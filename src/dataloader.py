@@ -14,7 +14,7 @@ from torchvision import transforms, utils
 class OccupancyNetDataset(Dataset):
     """Occupancy Network dataset."""
 
-    def __init__(self, root_dir, transform=None):
+    def __init__(self, root_dir, transform=None, num_points=1024):
         """
         Args:
             root_dir (string): Directory with all the images.
@@ -24,6 +24,7 @@ class OccupancyNetDataset(Dataset):
         self.root_dir = root_dir
         self.transform = transform
         self.files = []
+        self.num_points = num_points
         
         for sub in glob.glob(self.root_dir+'/*'):
             self.files.extend(glob.glob(sub+'/*'))

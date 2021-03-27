@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms, utils
 
-class OccupancyNetDataset(Dataset):
+class MyOccupancyNetDataset(Dataset):
     """Occupancy Network dataset."""
 
     def __init__(self, root_dir, transform=None, num_points=1024):
@@ -37,7 +37,8 @@ class OccupancyNetDataset(Dataset):
         # Fetch the file path and setup image folder paths
         req_path = self.files[idx]
         img_folder = os.path.join(req_path, 'img_choy2016')
-        img_path = random.choice(glob.glob(img_folder+'/*.jpg'))
+
+        img_path = random.choice(glob.glob(img_folder + '/*.jpg'))
 
         # Load the image with opencv and convert to RGB
         image = cv2.cvtColor(cv2.imread(img_path), cv2.COLOR_BGR2RGB)
@@ -55,7 +56,10 @@ class OccupancyNetDataset(Dataset):
         selected_idx = np.random.permutation(np.arange(points.shape[0]))[:self.num_points]
 
         # Use only the selected indices and pack everything up in a nice dictionary
-        sample = {'image': image, 'points': points[selected_idx], 'occupancies': occupancies[selected_idx]}
+        sample = (
+          torch.from_numpy(image).float().transpose(1, 2).transpose(0, 1), 
+          torch.from_numpy(points[selected_idx]), 
+          torch.from_numpy(occupancies[selected_idx]))
 
         # Apply any transformation necessary
         if self.transform:

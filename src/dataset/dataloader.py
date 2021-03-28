@@ -64,7 +64,7 @@ class OccupancyNetDataset(Dataset):
 
         # Apply any transformation necessary
         if self.transform:
-            sample = self.transform(sample)
+            sample[0] = self.transform(sample[0])
 
         return sample
     

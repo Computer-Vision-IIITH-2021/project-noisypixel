@@ -11,7 +11,9 @@ import matplotlib.pyplot as plt
 from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms, utils
 
-class MyOccupancyNetDataset(Dataset):
+
+
+class OccupancyNetDataset(Dataset):
     """Occupancy Network dataset."""
 
     def __init__(self, root_dir, transform=None, num_points=1024):
@@ -61,6 +63,67 @@ class MyOccupancyNetDataset(Dataset):
           torch.from_numpy(points[selected_idx]), 
           torch.from_numpy(occupancies[selected_idx]))
 
+        # Apply any transformation necessary
+        if self.transform:
+            sample = self.transform(sample)
+
+        return sample
+    
+
+class OccupancyNetDatasetHDF(Dataset):
+    """Occupancy Network dataset for HDF format."""
+
+    def __init__(self, root_dir, transform=None, num_points=1024):
+        """
+        Args:
+            root_dir (string): Directory with all the images.
+            transform (callable, optional): Optional transform to be applied
+            num_points (int): Number of points to sample in the object point cloud from the data
+                on a sample.
+        """
+        self.root_dir = root_dir
+        self.transform = transform
+        self.num_points = num_points
+        self.files = []
+        
+        for sub in os.listdir(self.root_dir):
+            self.files.append(sub)
+
+    def __len__(self):
+        return len(self.files)
+
+    def __getitem__(self, idx):
+        # Fetch the file path and setup image folder paths
+        req_path = self.files[idx]
+        file_path = os.path.join(self.root_dir, req_path)
+
+        # Load the h5 file
+        hf = h5py.File(file_path, 'r')
+        
+        # [NOTE]: the notation [()] below is to extract the value from HDF5 file
+        # get all images and randomly pick one
+        all_imgs = hf['images'][()]
+        random_idx = int(np.random.random()*all_imgs.shape[0])
+        
+        # Fetch the image we need
+        image = all_imgs[random_idx]
+        
+        # Get the points and occupancies
+        points = hf['points']['points'][()]
+        occupancies = np.unpackbits(hf['points']['occupancies'][()])
+
+        # Sample n points from the data
+        selected_idx = np.random.permutation(np.arange(points.shape[0]))[:self.num_points]
+
+        # Use only the selected indices and pack everything up in a nice dictionary
+        sample = (
+          torch.from_numpy(image).float().transpose(1, 2).transpose(0, 1), 
+          torch.from_numpy(points[selected_idx]), 
+          torch.from_numpy(occupancies[selected_idx]))
+        
+        # Close the hdf file
+        hf.close()
+        
         # Apply any transformation necessary
         if self.transform:
             sample = self.transform(sample)

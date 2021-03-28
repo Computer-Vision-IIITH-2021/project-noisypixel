@@ -7,7 +7,6 @@ import pandas as pd
 from skimage import io
 import numpy as np
 from PIL import Image
-import matplotlib.pyplot as plt
 from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms, utils
 
@@ -71,9 +70,9 @@ class OccupancyNetDataset(Dataset):
     
 
 class OccupancyNetDatasetHDF(Dataset):
-    """Occupancy Network dataset for HDF format."""
+    """Occupancy Network dataset."""
 
-    def __init__(self, root_dir, transform=None, num_points=1024):
+    def __init__(self, root_dir, transform=None, num_points=1024, default_transform=True):
         """
         Args:
             root_dir (string): Directory with all the images.
@@ -88,6 +87,11 @@ class OccupancyNetDatasetHDF(Dataset):
         
         for sub in os.listdir(self.root_dir):
             self.files.append(sub)
+            
+        # If not transforms have been provided, apply default imagenet transform
+        if transform is None and default_transform:
+            self.transform = transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                                                  std=[0.229, 0.224, 0.225])
 
     def __len__(self):
         return len(self.files)
@@ -116,19 +120,18 @@ class OccupancyNetDatasetHDF(Dataset):
         selected_idx = np.random.permutation(np.arange(points.shape[0]))[:self.num_points]
 
         # Use only the selected indices and pack everything up in a nice dictionary
-        sample = (
-          torch.from_numpy(image).float().transpose(1, 2).transpose(0, 1), 
-          torch.from_numpy(points[selected_idx]), 
-          torch.from_numpy(occupancies[selected_idx]))
+        final_image = torch.from_numpy(image).float().transpose(1, 2).transpose(0, 1)
+        final_points = torch.from_numpy(points[selected_idx])
+        final_gt = torch.from_numpy(occupancies[selected_idx])
         
         # Close the hdf file
         hf.close()
         
         # Apply any transformation necessary
         if self.transform:
-            sample = self.transform(sample)
+            final_image = self.transform(final_image)
 
-        return sample
+        return final_image, final_points, final_gt
 
 
 if __name__ == '__main__':

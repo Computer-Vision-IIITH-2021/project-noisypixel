@@ -120,9 +120,9 @@ class OccupancyNetDatasetHDF(Dataset):
         selected_idx = np.random.permutation(np.arange(points.shape[0]))[:self.num_points]
 
         # Use only the selected indices and pack everything up in a nice dictionary
-        final_image = torch.from_numpy(image).float().transpose(1, 2).transpose(0, 1)
-        final_points = torch.from_numpy(points[selected_idx])
-        final_gt = torch.from_numpy(occupancies[selected_idx])
+        final_image = torch.from_numpy(image).float().transpose(1, 2).transpose(0, 1) / image.max()
+        final_points = torch.from_numpy(points[selected_idx]).float()
+        final_gt = torch.from_numpy(occupancies[selected_idx]).float()
         
         # Close the hdf file
         hf.close()
@@ -131,7 +131,7 @@ class OccupancyNetDatasetHDF(Dataset):
         if self.transform:
             final_image = self.transform(final_image)
 
-        return final_image, final_points, final_gt
+        return [final_image, final_points, final_gt]
 
 
 if __name__ == '__main__':

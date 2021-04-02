@@ -105,6 +105,9 @@ def main(args):
             new_filename = "{}_{}.h5".format(cid, obx)
 
             try:
+                if os.path.exists(os.path.join(save_path, new_filename)):
+                    continue
+                
                 # If possible, load the object and it's propertiess
                 data_current = load_data(current_path)
                 

@@ -11,6 +11,8 @@ def save_dict_to_hdf5(dic, filename):
     """
     ....
     """
+    if os.path.exists(filename):
+        return
     with h5py.File(filename, 'w') as h5file:
         recursively_save_dict_contents_to_group(h5file, '/', dic)
 

@@ -7,6 +7,7 @@ import torchvision.models as models
 import pytorch_lightning as pl
 import torchmetrics
 
+
 class ResBlockFC(nn.Module):
     def __init__(self, in_dim, out_dim=None, h_dim=None):
         super().__init__()

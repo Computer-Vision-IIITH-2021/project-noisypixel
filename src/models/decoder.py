@@ -172,18 +172,19 @@ class CondResBlock(nn.Module):
 
         return skip + out
 
-class Decoder(nn.Module):
+class DecoderCBN(nn.Module):
     ''' Decoder with conditional batch normalization (CBN) class.
     Args:
-        in_dim (int): input dimension
+        p_dim (int): input dimension
         c_dim (int): dimension of latent conditioned code c
         h_dim (int): hidden size of Decoder network
     '''
 
-    def __init__(self, in_dim=3, c_dim=128,
+    def __init__(self, p_dim=3, c_dim=128,
                  h_dim=256):
         super().__init__()
-        self.z_dim = z_dim
+        # self.z_dim = z_dim
+        in_dim = p_dim
       
         # self.fc_z = nn.Linear(z_dim, h_dim)
 
@@ -211,10 +212,6 @@ class Decoder(nn.Module):
         enc = enc_p #+ enc_z
 
         enc = self.blocks(enc, c)
-        # net = self.block1(net, c)
-        # net = self.block2(net, c)
-        # net = self.block3(net, c)
-        # net = self.block4(net, c)
 
         out = self.fc_out(self.act(self.bn(enc, c)))
         out = out.squeeze(1)

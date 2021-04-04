@@ -33,12 +33,12 @@ class ONetLit(pl.LightningModule):
 
     def build_model(self):
         # First we create the encoder and decoder models
-        self.encoder_model = Resnet50(self.config.c_dim)
-        self.decoder_model = DecoderFC(self.config.p_dim, 
+        encoder_model = Resnet50(self.config.c_dim)
+        decoder_model = DecoderFC(self.config.p_dim, 
                                        self.config.c_dim, self.config.h_dim)
         
         # Now, we initialize the decoder model
-        self.net = OccNetImg(self.encoder_model, self.decoder_model)
+        self.net = OccNetImg(encoder_model, decoder_model)
     
     def forward(self, img, pts):
         return self.net(img, pts)

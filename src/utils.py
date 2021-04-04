@@ -40,3 +40,10 @@ class Config:
         self.batch_size = 64
         self.output_dir = "/home2/sdokania/all_projects/occ_artifacts/"
         self.exp_name = "initial"
+    
+    def print_config(self):
+        # Print as a dictionary
+        print(vars(self))
+    
+    def export_config(self):
+        return vars(self)

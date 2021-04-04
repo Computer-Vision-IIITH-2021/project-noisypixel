@@ -3,6 +3,9 @@ import numpy as np
 import torchvision
 from torchvision import models, transforms
 import torch.nn as nn
+from matplotlib import cm
+from sklearn.manifold import TSNE
+from sklearn.cluster import KMeans
 import torchvision.transforms as transforms
 
 transform = transforms.Compose(
@@ -40,3 +43,30 @@ for i in range(len(model_children)):
                     model_weights.append(child.weight)
                     conv_layers.append(child)
 print(f"Total convolutional layers: {counter}")
+
+
+for weight, conv in zip(model_weights, conv_layers):
+    # print(f"WEIGHT: {weight} \nSHAPE: {weight.shape}")
+    print(f"CONV: {conv} ====> SHAPE: {weight.shape}")
+
+print(data.shape)
+results = [conv_layers[0](data)]
+print(results[0].shape)
+for i in range(1, len(conv_layers)):
+    # pass the result from the last layer to the next layer
+    results.append(conv_layers[i](results[-1]))
+    print(results[-1].shape)
+# make a copy of the `results`plt.scatter(ty,[i for i in range(len(ty))])
+# outputs = results[-1]#.view(results[-1].shape[0],-1)
+# print(outputs.shape)
+m = nn.AvgPool2d(2, stride=2)
+output = m(results[-1])
+outputs = output.view(output.shape[0],-1)
+print(outputs.shape)
+out = outputs.cpu().detach().numpy()
+
+
+kmeans = KMeans(n_clusters=10, random_state=0).fit(out)
+lab = kmeans.predict(out)
+
+tsne = TSNE(n_components=2).fit_transform(out)

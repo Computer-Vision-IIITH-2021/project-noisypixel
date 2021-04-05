@@ -4,6 +4,7 @@ import torchvision
 from torchvision import models, transforms
 import torch.nn as nn
 from matplotlib import cm
+import matplotlib.pyplot as plt
 from sklearn.manifold import TSNE
 from sklearn.cluster import KMeans
 import torchvision.transforms as transforms
@@ -70,3 +71,44 @@ kmeans = KMeans(n_clusters=10, random_state=0).fit(out)
 lab = kmeans.predict(out)
 
 tsne = TSNE(n_components=2).fit_transform(out)
+
+colors_per_class = {
+    1 : [254, 202, 87],
+    2 : [255, 107, 107],
+    3 : [10, 189, 227],
+    4 : [255, 159, 243],
+    5 : [16, 172, 132],
+    6 : [128, 80, 128],
+    7 : [87, 101, 116],
+    8 : [52, 31, 151],
+    9 : [0, 0, 0],
+    0 : [100, 100, 255],
+}
+
+# initialize a matplotlib plot
+fig = plt.figure(figsize=(10,10))
+ax = fig.add_subplot(111)
+
+# colors_per_class = range(10)
+# for every class, we'll add a scatter plot separately
+for label in colors_per_class:
+    
+#     print(label)
+    # find the samples of the current class in the data
+    indices = [i for i, l in enumerate(lab) if l == label]
+#     print(indices)
+    # extract the coordinates of the points of this class only
+    current_tx = np.take(tx, indices)
+    current_ty = np.take(ty, indices)
+
+    # convert the class color to matplotlib formatprint(lab.shape)
+    color = np.array(colors_per_class[label], dtype=np.float) / 255
+
+    # add a scatter plot with the corresponding color akmeans.cluster_centers_nd label
+    ax.scatter(current_tx, current_ty, color=color, label=label)
+
+# build a legend using the labels we set previously
+ax.legend(loc='best')
+
+# finally, show the plot
+plt.show()

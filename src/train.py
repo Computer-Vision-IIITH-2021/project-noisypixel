@@ -48,7 +48,7 @@ if __name__ == "__main__":
     
     # Initialize tensorboard logger
     logger = TensorBoardLogger(
-        save_dir=os.getcwd(),
+        save_dir=config.exp_path,
         version=1,
         name="lightning_logs"
     )
@@ -66,7 +66,7 @@ if __name__ == "__main__":
         # auto_scale_batch_size='binsearch',
         logger=logger,
         min_epochs=1,
-        max_epochs=1,
+        max_epochs=200,
         default_root_dir=config.output_dir,
         log_every_n_steps=10,
         progress_bar_refresh_rate=5,

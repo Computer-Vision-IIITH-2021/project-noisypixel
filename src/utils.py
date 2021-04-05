@@ -30,6 +30,7 @@ class Config:
         self.exp_path = os.path.join(self.output_dir, self.exp_name)
         # optimizer related config
         self.lr = 3e-04
+        print("Setting sexperiment path as : {}".format(self.exp_path))
         
         os.makedirs(self.output_dir, exist_ok=True)
         os.makedirs(self.exp_path, exist_ok=True)

@@ -18,8 +18,8 @@ import torch.nn.functional as F
 import pytorch_lightning as pl
 import torchmetrics
 
-from .models import *
-from .dataset.dataloader import OccupancyNetDatasetHDF
+from models import *
+from dataset.dataloader import OccupancyNetDatasetHDF
 
 
 class ONetLit(pl.LightningModule):
@@ -71,10 +71,9 @@ class ONetLit(pl.LightningModule):
         return torch.utils.data.DataLoader(self.train_dataset, 
                                            batch_size=self.config.batch_size, 
                                            shuffle=True,
-                                           num_workers=8)
+                                           num_workers=4)
     
     def val_dataloader(self):
         return torch.utils.data.DataLoader(self.val_dataset, 
                                            batch_size=self.config.batch_size, 
-                                           shuffle=True,
-                                           num_workers=8)
+                                           shuffle=False)

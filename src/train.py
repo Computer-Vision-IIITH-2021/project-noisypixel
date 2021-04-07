@@ -35,6 +35,8 @@ if __name__ == "__main__":
     parser.add_argument('--batch_size', action='store', type=int, default=64, help="Training batch size")
     parser.add_argument('--output_path', action='store', type=str, default="/home2/sdokania/all_projects/occ_artifacts/", help="Model saving and checkpoint paths")
     parser.add_argument('--exp_name', action='store', type=str, default="initial", help="Name of the experiment. Artifacts will be created with this name")
+    parser.add_argument('--encoder', action='store', type=str, default="efficientnet-b0", help="Name of the Encoder architecture to use")
+    parser.add_argument('--decoder', action='store', type=str, default="decoder-cbn", help="Name of the decoder architecture to use")
     
     args = parser.parse_args()
     # Get the model configuration

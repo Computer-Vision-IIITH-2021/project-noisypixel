@@ -20,8 +20,15 @@ encoder_models = {
 
 decoder_models = {
     "decoder-fc": DecoderFC,
-    "decoder-cbn": DecoderCBN
+    "decoder-cbn": DecoderCBN,
 }
+
+
+def build_encoder(model_name="efficientnet-b0"):
+    return encoder_models[model_name]
+
+def build_decoder(model_name="decoder-cbn"):
+    return decoder_models[model_name]
 
 
 class OccNetImg(nn.Module):

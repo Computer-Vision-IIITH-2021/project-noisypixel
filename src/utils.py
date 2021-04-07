@@ -24,6 +24,8 @@ class Config:
             self.batch_size = args.batch_size
             self.output_dir = args.output_path
             self.exp_name = args.exp_name
+            self.encoder = args.encoder
+            self.decoder = args.decoder
         
         self.exp_path = os.path.join(self.output_dir, self.exp_name)
         # optimizer related config
@@ -40,6 +42,8 @@ class Config:
         self.batch_size = 64
         self.output_dir = "/home2/sdokania/all_projects/occ_artifacts/"
         self.exp_name = "initial"
+        self.encoder = "efficientnet-b0"
+        self.decoder = "decoder-cbn"
     
     def print_config(self):
         # Print as a dictionary

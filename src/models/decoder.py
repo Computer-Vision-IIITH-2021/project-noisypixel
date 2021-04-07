@@ -70,6 +70,7 @@ class DecoderFC(nn.Module):
         out = self.fc(self.act(enc)).squeeze(-1)
         return out
 
+
 class CondBatchNorm(nn.Module):
     ''' Conditional batch normalization layer class.
     Args:
@@ -78,22 +79,22 @@ class CondBatchNorm(nn.Module):
         norm: normalization method
     '''
 
-    def __init__(self, c_dim, p_dim, norm = 'batch_norm'):
+    def __init__(self, c_dim, in_dim, norm = 'batch_norm'):
         super().__init__()
         self.c_dim = c_dim
-        self.p_dim = p_dim
+        self.in_dim = in_dim
         self.norm = norm
         
         # computing the gamma and beta values
-        self.gamma = nn.Linear(c_dim, p_dim, 1)
-        self.beta = nn.Linear(c_dim, p_dim, 1)
+        self.gamma = nn.Linear(c_dim, in_dim)
+        self.beta = nn.Linear(c_dim, in_dim)
 
         if self.norm == 'batch_norm':
-            self.batchnorm = nn.BatchNorm1d(p_dim, affine=False)
+            self.batchnorm = nn.BatchNorm1d(in_dim, affine=False)
         elif self.norm == 'instance_norm':
-            self.batchnorm = nn.InstanceNorm1d(p_dim, affine=False)
+            self.batchnorm = nn.InstanceNorm1d(in_dim, affine=False)
         elif self.norm == 'group_norm':
-            self.batchnorm = nn.GroupNorm1d(p_dim, affine=False)
+            self.batchnorm = nn.GroupNorm1d(in_dim, affine=False)
         else:
             raise ValueError('Invalid normalization method!')
         self.reset_parameters()
@@ -105,17 +106,12 @@ class CondBatchNorm(nn.Module):
         nn.init.zeros_(self.beta.bias)
 
     def forward(self, x, c):
-        assert(x.size(0) == c.size(0))
-        assert(c.size(1) == self.c_dim)
-
-        # c should be of size batch_size x c_dim x T
-        if len(c.size()) == 2:
-            c = c.unsqueeze(2)
-
+        batch_size = x.size(0)
         # Affine mapping
         gamma = self.gamma(c)
         beta = self.beta(c)
-
+        gamma = gamma.view(batch_size, self.in_dim, 1)
+        beta = beta.view(batch_size, self.in_dim, 1)
         # Batchnorm
         net = self.batchnorm(x)
         out = gamma * net + beta
@@ -189,13 +185,13 @@ class DecoderCBN(nn.Module):
         # self.fc_z = nn.Linear(z_dim, h_dim)
 
         self.fc_p = nn.Conv1d(in_dim, h_dim, 1)
-        self.blocks = nn.Sequential(
-            CondResBlock(c_dim, h_dim),
-            CondResBlock(c_dim, h_dim),
-            CondResBlock(c_dim, h_dim),
-            CondResBlock(c_dim, h_dim),
-            CondResBlock(c_dim, h_dim)
-        )
+        
+        self.block1 = CondResBlock(c_dim, h_dim)
+        self.block2 = CondResBlock(c_dim, h_dim)
+        self.block3 = CondResBlock(c_dim, h_dim)
+        self.block4 = CondResBlock(c_dim, h_dim)
+        self.block5 = CondResBlock(c_dim, h_dim)
+        
 
         self.bn = CondBatchNorm(c_dim, h_dim)
 
@@ -204,14 +200,18 @@ class DecoderCBN(nn.Module):
         self.act = F.relu
 
     def forward(self, p, c, **kwargs):
-        # p = p.transpose(1, 2)
+        p = p.transpose(1, 2)
         batch_size, D, T = p.size()
         enc_p = self.fc_p(p)
 
         # enc_z = self.fc_z(z).unsqueeze(2)
         enc = enc_p #+ enc_z
 
-        enc = self.blocks(enc, c)
+        enc = self.block1(enc, c)
+        enc = self.block2(enc, c)
+        enc = self.block3(enc, c)
+        enc = self.block4(enc, c)
+        enc = self.block5(enc, c)
 
         out = self.fc_out(self.act(self.bn(enc, c)))
         out = out.squeeze(1)

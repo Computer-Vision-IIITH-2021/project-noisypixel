@@ -23,7 +23,7 @@ testloader = torch.utils.data.DataLoader(testset, batch_size=2,
                                          shuffle=False, num_workers=2)
 
 
-model = models.resnet50(pretrained=True)
+model = models.resnet18(pretrained=True)
 model_weights = [] 
 conv_layers = [] 
 model_children = list(model.children())

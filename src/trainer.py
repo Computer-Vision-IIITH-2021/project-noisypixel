@@ -51,14 +51,30 @@ class ONetLit(pl.LightningModule):
         self.log("train_loss", loss.item())
         return loss
     
+    def validation_step(self, batch, batch_idx):
+        imgs, pts, gts = batch
+        output = self(imgs, pts)
+
+        loss = F.binary_cross_entropy_with_logits(output, gts)
+        acc = ((output > 0.5) == (gts > 0.5)).sum() / gts.flatten().shape[0]
+        self.log("val_loss", loss.item())
+        self.log("acc_loss", acc.item())
+    
     def configure_optimizers(self):
         return torch.optim.Adam(self.parameters(), lr=self.config.lr)
     
     def setup(self, stage=None):
-        self.train_dataset = OccupancyNetDatasetHDF(self.config.data_root)
+        self.train_dataset = OccupancyNetDatasetHDF(self.config.data_root, mode="train")
+        self.val_dataset = OccupancyNetDatasetHDF(self.config.data_root, mode="val")
     
     def train_dataloader(self):
         return torch.utils.data.DataLoader(self.train_dataset, 
                                            batch_size=self.config.batch_size, 
                                            shuffle=True,
-                                           num_workers=2)
+                                           num_workers=8)
+    
+    def val_dataloader(self):
+        return torch.utils.data.DataLoader(self.val_dataset, 
+                                           batch_size=self.config.batch_size, 
+                                           shuffle=True,
+                                           num_workers=8)

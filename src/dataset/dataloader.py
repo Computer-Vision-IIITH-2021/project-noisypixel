@@ -116,18 +116,20 @@ class OccupancyNetDatasetHDF(Dataset):
         
         # Fetch the image we need
         image = all_imgs[random_idx]
-        
-        # Get the points and occupancies
-        points = hf['points']['points'][()]
-        occupancies = np.unpackbits(hf['points']['occupancies'][()])
+        try:
+            # Get the points and occupancies
+            points = hf['points']['points'][()]
+            occupancies = np.unpackbits(hf['points']['occupancies'][()])
 
-        # Sample n points from the data
-        selected_idx = np.random.permutation(np.arange(points.shape[0]))[:self.num_points]
+            # Sample n points from the data
+            selected_idx = np.random.permutation(np.arange(points.shape[0]))[:self.num_points]
 
-        # Use only the selected indices and pack everything up in a nice dictionary
-        final_image = torch.from_numpy(image).float().transpose(1, 2).transpose(0, 1) / image.max()
-        final_points = torch.from_numpy(points[selected_idx]).float()
-        final_gt = torch.from_numpy(occupancies[selected_idx]).float()
+            # Use only the selected indices and pack everything up in a nice dictionary
+            final_image = torch.from_numpy(image).float().transpose(1, 2).transpose(0, 1) / image.max()
+            final_points = torch.from_numpy(points[selected_idx]).float()
+            final_gt = torch.from_numpy(occupancies[selected_idx]).float()
+        except:
+            print(idx, file_path)
         
         # Close the hdf file
         hf.close()

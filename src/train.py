@@ -18,6 +18,7 @@ import torch.nn.functional as F
 
 import pytorch_lightning as pl
 from pytorch_lightning.loggers import TensorBoardLogger
+from pytorch_lightning.callbacks import ModelCheckpoint
 import torchmetrics
 
 from models import *
@@ -47,9 +48,16 @@ if __name__ == "__main__":
     
     # Initialize tensorboard logger
     logger = TensorBoardLogger(
-        save_dir=config.exp_path,
+        save_dir=os.getcwd(),
         version=1,
         name="lightning_logs"
+    )
+
+    # Initialize the checkpoint module
+    checkpoint_callback = ModelCheckpoint(
+        monitor="val_loss",
+        mode="min",
+        save_top_k=3
     )
     
     # Define the trainer object
@@ -57,14 +65,16 @@ if __name__ == "__main__":
         gpus=1,
         # auto_scale_batch_size='binsearch',
         logger=logger,
-        min_epochs=5,
-        # max_epochs=5,
-        default_root_dir = config.exp_path,
+        min_epochs=1,
+        max_epochs=1,
+        default_root_dir=config.output_dir,
         log_every_n_steps=10,
-        progress_bar_refresh_rate=2,
+        progress_bar_refresh_rate=5,
         # precision=16,
         # stochastic_weight_avg=True,
         # track_grad_norm=2,
+        callbacks=[checkpoint_callback],
+        check_val_every_n_epoch=1,
     )
     
     # Start training

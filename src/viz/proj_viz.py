@@ -14,6 +14,7 @@ for i in range(10):
     fig = plt.figure(figsize=(16, 8))
     print('Using Camera matrix: world_mat_{}'.format(i))
     p = cameras['world_mat_{}'.format(i)]
+    img = cv2.imread(os.path.join(img_path,'00{}.jpg'.format(i)))
     for j in range(points.shape[0]):
     	proj = p @ np.append(points[j],1).T
         proj = proj/proj[2]
@@ -21,4 +22,8 @@ for i in range(10):
         ax0.plot(proj[1], proj[0], 'r*', markersize=3)
         ax0.set_title("Projected Point Cloud")
         ax0.axis('off')
+
+        ax1.imshow(im)
+        ax1.set_title("Corresponding Image")
+        ax1.axis('off')
     plt.show()    

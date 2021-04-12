@@ -9,6 +9,7 @@ from PIL import Image
 from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms, utils
 import h5py
+import argparse
 
 # Network building stuff
 import torch
@@ -26,6 +27,15 @@ from utils import Config, count_parameters
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Argument parser for training the model")
+    parser.add_argument('--cdim', action='store', type=int, default=128, help="feature dimension")
+    parser.add_argument('--hdim', action='store', type=int, default=128, help="hidden size for decoder")
+    parser.add_argument('--data_root', action='store', type=str, default="/ssd_scratch/cvit/sdokania/hdf_shapenet/hdf_data/", help="location of the parsed and processed dataset")
+    parser.add_argument('--batch_size', action='store', type=int, default=64, help="Training batch size")
+    parser.add_argument('--output_path', action='store', type=str, default="/home2/sdokania/all_projects/occ_artifacts/", help="Model saving and checkpoint paths")
+    parser.add_argument('--exp_name', action='store', type=str, default="initial", default="Name of the experiment. Artifacts will be created with this name")
+    
+    args = parser.parse_args()
     # Get the model configuration
     config = Config()
     

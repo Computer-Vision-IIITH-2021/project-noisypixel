@@ -1,6 +1,7 @@
 import os
 import glob
 import torch
+import h5py
 import cv2
 import random
 import pandas as pd

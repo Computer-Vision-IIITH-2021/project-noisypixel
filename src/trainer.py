@@ -19,6 +19,7 @@ import pytorch_lightning as pl
 import torchmetrics
 
 from models import *
+from dataset.dataloader import OccupancyNetDatasetHDF
 
 
 class ONetLit(pl.LightningModule):

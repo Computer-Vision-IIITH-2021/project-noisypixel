@@ -13,7 +13,26 @@ def count_parameters(network):
     
 
 class Config:
-    def __init__(self):
+    def __init__(self, args=None):
+        if args is None:
+            self.set_default_data()
+        else:
+            self.c_dim = args.cdim
+            self.h_dim = args.hdim
+            self.p_dim = args.pdim
+            self.data_root = args.data_root
+            self.batch_size = args.batch_size
+            self.output_dir = args.output_path
+            self.exp_name = args.exp_name
+        
+        self.exp_path = os.path.join(self.output_dir, self.exp_name)
+        # optimizer related config
+        self.lr = 3e-04
+        
+        os.makedirs(self.output_dir, exist_ok=True)
+        os.makedirs(self.exp_path, exist_ok=True)
+    
+    def set_default_data(self):
         self.c_dim = 128
         self.h_dim = 128
         self.p_dim = 3
@@ -21,7 +40,3 @@ class Config:
         self.batch_size = 64
         self.output_dir = "/home2/sdokania/all_projects/occ_artifacts/"
         self.exp_name = "initial"
-
-        # optimizer related config
-        self.lr = 3e-04
-        os.makedirs(self.output_dir, exist_ok=True)

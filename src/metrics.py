@@ -47,3 +47,41 @@ def compute_iou(occ1, occ2):
     iou = (area_intersect / area_union)
 
     return iou
+
+
+empty_point_dict = {
+    'completeness': np.sqrt(3),
+    'accuracy': np.sqrt(3),
+    'completeness2': 3,
+    'accuracy2': 3,
+    'chamfer': 6,
+}
+
+empty_normal_dict = {
+    'normals completeness': -1.,
+    'normals accuracy': -1.,
+    'normals': -1.,
+}
+
+
+def compute_separation(points_src, normals_src, points_tgt, normals_tgt):
+    ''' Computes minimal distances of each point in points_src to points_tgt.
+    Args:
+        points_src (numpy array): source points
+        normals_src (numpy array): source normals
+        points_tgt (numpy array): target points
+        normals_tgt (numpy array): target normals
+    '''
+    kdtree = KDTree(points_tgt)
+    sepr, ind = kdtree.query(points_src)
+
+    if normals_src is not None and normals_tgt is not None:
+        normals_src = normals_src / np.linalg.norm(normals_src, axis=-1, keepdims=True)
+        normals_tgt = normals_tgt / np.linalg.norm(normals_tgt, axis=-1, keepdims=True)
+
+        normals_dot_product = (normals_tgt[ind] * normals_src).sum(axis=-1)
+        normals_dot_product = np.abs(normals_dot_product)
+    else:
+        normals_dot_product = np.array(
+            [np.nan] * points_src.shape[0], dtype=np.float32)
+    return sepr, normals_dot_product

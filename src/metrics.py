@@ -153,3 +153,7 @@ def eval_pointcloud(pointcloud, pointcloud_gt,
         }
 
         return out_dict
+
+if __name__ == '__main__':
+	eval_dict = eval_pointcloud(pointcloud, pointcloud_gt, normals, normals_gt, occ_1, occ_2)
+	print(eval_dict)

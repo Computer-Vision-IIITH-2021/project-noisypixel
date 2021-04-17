@@ -1,3 +1,4 @@
+import os
 import torch
 import numpy as np
 
@@ -16,12 +17,11 @@ class Config:
         self.c_dim = 128
         self.h_dim = 128
         self.p_dim = 3
-        self.data_root = "/content/drive/MyDrive/datasets/hdf_data/"
+        self.data_root = "/ssd_scratch/"
         self.batch_size = 64
-        self.output_dir = "/content/drive/MyDrive/datasets/occ_artifacts/"
+        self.output_dir = "/home2/sdokania/all_projects/occ_artifacts/"
         self.exp_name = "initial"
 
         # optimizer related config
         self.lr = 3e-04
-
         os.makedirs(self.output_dir, exist_ok=True)

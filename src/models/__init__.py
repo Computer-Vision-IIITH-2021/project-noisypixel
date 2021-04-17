@@ -4,9 +4,9 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torchvision.models as models
 
-from decoder import ResBlockFC, DecoderFC
-from efficientnet import EfficientNetB0, EfficientNetB1, EfficientNetB5, EfficientNetB7
-from resnet import Resnet50, Resnet18
+from .decoder import ResBlockFC, DecoderFC
+from .efficientnet import EfficientNetB0, EfficientNetB1, EfficientNetB5, EfficientNetB7
+from .resnet import Resnet50, Resnet18
 
 class OccNetImg(nn.Module):
     """

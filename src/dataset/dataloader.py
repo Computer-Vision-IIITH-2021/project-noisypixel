@@ -73,7 +73,7 @@ class OccupancyNetDataset(Dataset):
 class OccupancyNetDatasetHDF(Dataset):
     """Occupancy Network dataset."""
 
-    def __init__(self, root_dir, transform=None, num_points=1024, default_transform=True, mode="train"):
+    def __init__(self, root_dir, transform=None, num_points=1024, default_transform=True, mode="train", balance=False):
         """
         Args:
             root_dir (string): Directory with all the images.
@@ -87,6 +87,8 @@ class OccupancyNetDatasetHDF(Dataset):
         self.num_points = num_points
         self.mode = mode
         self.files = []
+        self.pos_neg_ratio = [0.2, 0.5]
+        self.balance = balance
         
         # Save the files
         f = open(os.path.join(self.root_dir, "{}.lst".format(self.mode)), 'r')
@@ -100,6 +102,9 @@ class OccupancyNetDatasetHDF(Dataset):
 
     def __len__(self):
         return len(self.files)
+    
+    def get_prob(self):
+        return self.pos_neg_ratio[0] + (np.random.random() * (self.pos_neg_ratio[1] - self.pos_neg_ratio[0]))
 
     def __getitem__(self, idx):
         # Fetch the file path and setup image folder paths
@@ -120,9 +125,20 @@ class OccupancyNetDatasetHDF(Dataset):
             # Get the points and occupancies
             points = hf['points']['points'][()]
             occupancies = np.unpackbits(hf['points']['occupancies'][()])
-
+            
             # Sample n points from the data
-            selected_idx = np.random.permutation(np.arange(points.shape[0]))[:self.num_points]
+            if self.balance:
+                # Create index list
+                indices = np.arange(occupancies.shape[0])
+                n_pos = min(int(self.num_points * self.get_prob()), (occupancies == 1).sum())
+                n_neg = self.num_points - n_pos
+                positive_idx = np.random.permutation(indices[occupancies == 1])[:n_pos]
+                negative_idx = np.random.permutation(indices[occupancies == 0])[:n_neg]
+                selected_idx = np.concatenate([positive_idx, negative_idx])
+                
+            else:
+                selected_idx = np.random.permutation(np.arange(points.shape[0]))[:self.num_points]
+            
 
             # Use only the selected indices and pack everything up in a nice dictionary
             final_image = torch.from_numpy(image).float().transpose(1, 2).transpose(0, 1) / image.max()

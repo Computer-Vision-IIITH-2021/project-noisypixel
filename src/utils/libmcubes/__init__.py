@@ -1,7 +1,7 @@
-from im2mesh.utils.libmcubes.mcubes import (
+from src.utils.libmcubes.mcubes import (
     marching_cubes, marching_cubes_func
 )
-from im2mesh.utils.libmcubes.exporter import (
+from src.utils.libmcubes.exporter import (
     export_mesh, export_obj, export_off
 )
 

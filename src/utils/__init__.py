@@ -23,13 +23,16 @@ class Config:
             self.data_root = args.data_root
             self.batch_size = args.batch_size
             self.output_dir = args.output_path
-            self.exp_name = args.exp_name
+            self._exp_name = args.exp_name
             self.encoder = args.encoder
             self.decoder = args.decoder
         
-        self.exp_path = os.path.join(self.output_dir, self.exp_name)
         # optimizer related config
         self.lr = 3e-04
+        self.prepare_experiment_path()
+    
+    def prepare_experiment_path(self):
+        self.exp_path = os.path.join(self.output_dir, self._exp_name)
         print("Setting sexperiment path as : {}".format(self.exp_path))
         
         os.makedirs(self.output_dir, exist_ok=True)
@@ -42,7 +45,7 @@ class Config:
         self.data_root = "/ssd_scratch/"
         self.batch_size = 64
         self.output_dir = "/home2/sdokania/all_projects/occ_artifacts/"
-        self.exp_name = "initial"
+        self._exp_name = "initial"
         self.encoder = "efficientnet-b0"
         self.decoder = "decoder-cbn"
     
@@ -52,3 +55,12 @@ class Config:
     
     def export_config(self):
         return vars(self)
+    
+    @property
+    def exp_name(self):
+        return self._exp_name
+    
+    @exp_name.setter
+    def exp_name(self, value):
+        self._exp_name = value
+        self.prepare_experiment_path()

@@ -5,6 +5,7 @@ import os
 import skimage.io as sio
 import tqdm
 import argparse
+import pickle as pkl
 
 def save_dict_to_hdf5(dic, filename):
     """
@@ -82,10 +83,18 @@ def main(args):
     os.makedirs(os.path.join(dataset_dir, "hdf_data"), exist_ok=True)
     save_path = os.path.join(dataset_dir, "hdf_data")
     
+    file_lists = {
+        'train.lst': [],
+        'test.lst': [],
+        'val.lst': []
+    }
+    
     # iterate over each class in the dataset
     for cid in os.listdir(data_root):
         # Get the path to each object and list of objects
         objs_path = os.path.join(data_root, cid)
+        if "metadata" in cid.lower():
+            continue
         obj_list = os.listdir(objs_path)
         
         # iterate over each object in the dataset class
@@ -101,8 +110,26 @@ def main(args):
                 save_dict_to_hdf5(data_current, os.path.join(save_path, new_filename))
             except:
                 # Print the file name for error logs
-                print("Error at {}-{}".format(cid, obx))
-
+                if obx.lower() in ["train.lst", "test.lst", "val.lst"]:
+                    # read each file
+                    f = open(current_path, 'r')
+                    flist = ["{}_{}.h5".format(cid, yx) for yx in f.read().split()]
+                    f.close()
+                    
+                    # Append to file lists
+                    file_lists[obx] += flist
+                else:
+                    print("Error at {}-{}".format(cid, obx))
+    
+    # Now save the file lists as well
+    for kx in file_lists.keys():
+        # Get each file list and save
+        print("Processing list for {}".format(kx))
+        flist = "\n".join(file_lists[kx])
+        f = open(os.path.join(save_path, kx), 'w')
+        f.write(flist)
+        f.close()
+    print("Saved data with train-test-val splits...")
 
 
 if __name__ == "__main__":

@@ -49,21 +49,6 @@ def compute_iou(occ1, occ2):
     return iou
 
 
-empty_point_dict = {
-    'completeness': np.sqrt(3),
-    'accuracy': np.sqrt(3),
-    'completeness2': 3,
-    'accuracy2': 3,
-    'chamfer': 6,
-}
-
-empty_normal_dict = {
-    'normals completeness': -1.,
-    'normals accuracy': -1.,
-    'normals': -1.,
-}
-
-
 def compute_separation(points_src, normals_src, points_tgt, normals_tgt):
     ''' Computes minimal distances of each point in points_src to points_tgt.
     Args:
@@ -85,3 +70,86 @@ def compute_separation(points_src, normals_src, points_tgt, normals_tgt):
         normals_dot_product = np.array(
             [np.nan] * points_src.shape[0], dtype=np.float32)
     return sepr, normals_dot_product
+
+
+def eval_pointcloud(pointcloud, pointcloud_gt,
+                        normals, normals_gt, occ1, occ2):
+        ''' 
+        Evaluates a point cloud.
+        Args:
+            pointcloud (numpy array): predicted point cloud
+            pointcloud_gt (numpy array): ground truth point cloud
+            normals (numpy array): predicted normals
+            normals_gt (numpy array): ground truth normals
+        '''
+        # Return maximum losses if pointcloud is empty
+
+        empty_point_dict = {
+		    'completeness': np.sqrt(3),
+		    'accuracy': np.sqrt(3),
+		    'completeness2': 3,
+		    'accuracy2': 3,
+		    'chamfer': 6,
+		}
+
+		empty_normal_dict = {
+		    'normals completeness': -1.,
+		    'normals accuracy': -1.,
+		    'normals': -1.,
+		}
+
+        if pointcloud.shape[0] == 0:
+            print('Empty pointcloud / mesh detected!')
+            out_dict = empty_point_dict
+            if normals is not None and normals_tgt is not None:
+                out_dict.update(empty_normal_dict)
+            return out_dict
+
+        pointcloud = np.asarray(pointcloud)
+        pointcloud_gt = np.asarray(pointcloud_gt)
+
+        # Completeness: how far are the points of the groundtruth point cloud
+        # from the predicted point cloud
+        completeness, normal_completeness = compute_separation(
+            pointcloud_gt, normals_gt, pointcloud, normals
+        )
+        completeness_sq = completeness**2
+
+        completeness = completeness.mean()
+        completeness_sq = completeness_sq.mean()
+        normal_completeness = normal_completeness.mean()
+
+        # Accuracy: how far are the points of the predicted pointcloud
+        # from the groundtruth pointcloud
+        accuracy, normal_accuracy = compute_separation(
+            pointcloud, normals, pointcloud_gt, normals_gt
+        )
+        accuracy_sq = accuracy**2
+
+        accuracy = accuracy.mean()
+        accuracy_sq = accuracy_sq.mean()
+        normal_accuracy = normal_accuracy.mean()
+
+        # Chamfer distance
+        chamferL2 = 0.5 * (completeness_sq + accuracy_sq)
+        normals_correction = (
+            0.5 * normal_completeness + 0.5 * normal_accuracy
+        )
+        chamferL1 = 0.5 * (completeness + accuracy)
+        
+        occupancy_iou = compute_iou(occ1, occ2)
+
+        out_dict = {
+            'completeness': completeness,
+            'accuracy': accuracy,
+            'normals completeness': normal_completeness,
+            'normals accuracy': normal_accuracy,
+            'normals': normals_correction,
+            'completeness_sq': completeness_sq,
+            'accuracy_sq': accuracy_sq,
+            'chamfer-L2': chamferL2,compute_iou(occ1, occ2)
+            'chamfer-L1': chamferL1,
+            'iou': occupancy_iou
+        }
+
+        return out_dict

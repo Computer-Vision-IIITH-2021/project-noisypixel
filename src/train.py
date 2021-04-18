@@ -34,7 +34,7 @@ if __name__ == "__main__":
     parser.add_argument('--data_root', action='store', type=str, default="/ssd_scratch/cvit/sdokania/hdf_shapenet/hdf_data/", help="location of the parsed and processed dataset")
     parser.add_argument('--batch_size', action='store', type=int, default=64, help="Training batch size")
     parser.add_argument('--output_path', action='store', type=str, default="/home2/sdokania/all_projects/occ_artifacts/", help="Model saving and checkpoint paths")
-    parser.add_argument('--exp_name', action='store', type=str, default="initial", default="Name of the experiment. Artifacts will be created with this name")
+    parser.add_argument('--exp_name', action='store', type=str, default="initial", help="Name of the experiment. Artifacts will be created with this name")
     
     args = parser.parse_args()
     # Get the model configuration

@@ -1,0 +1,3 @@
+[submodule "src/pykdtree"]
+	path = src/pykdtree
+	url = https://github.com/storpipfugl/pykdtree.git

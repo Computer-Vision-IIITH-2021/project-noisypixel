@@ -87,7 +87,7 @@ class OccupancyNetDatasetHDF(Dataset):
         self.num_points = num_points
         self.mode = mode
         self.files = []
-        self.pos_neg_ratio = [0.2, 0.5]
+        self.pos_neg_ratio = [0.1, 0.35]
         self.balance = balance
         
         # Save the files

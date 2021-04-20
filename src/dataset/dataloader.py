@@ -72,21 +72,25 @@ class OccupancyNetDataset(Dataset):
 class OccupancyNetDatasetHDF(Dataset):
     """Occupancy Network dataset."""
 
-    def __init__(self, root_dir, transform=None, num_points=1024, default_transform=True):
+    def __init__(self, root_dir, transform=None, num_points=1024, default_transform=True, mode="train"):
         """
         Args:
             root_dir (string): Directory with all the images.
             transform (callable, optional): Optional transform to be applied
             num_points (int): Number of points to sample in the object point cloud from the data
                 on a sample.
+            mode (str): Which data split do we want among train, test and val
         """
         self.root_dir = root_dir
         self.transform = transform
         self.num_points = num_points
+        self.mode = mode
         self.files = []
         
-        for sub in os.listdir(self.root_dir):
-            self.files.append(sub)
+        # Save the files
+        f = open(os.path.join(self.root_dir, "{}.lst".format(self.mode)), 'r')
+        self.files = f.read().split()
+        f.close()
             
         # If not transforms have been provided, apply default imagenet transform
         if transform is None and default_transform:

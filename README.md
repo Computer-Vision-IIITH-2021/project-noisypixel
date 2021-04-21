@@ -7,11 +7,9 @@ Metrics Functionality uses pykdtree library. pykdtree is a kd-tree implementatio
 Installation
 ------------
 
-.. code-block:: bash
-
     $ cd <pykdtree_dir>
     $ python setup.py install
-    
+
 Code structure:
 ```
 - resources

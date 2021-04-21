@@ -1,0 +1,13 @@
+numpy
+scipy
+matplotlib
+scikit-learn
+scikit-image
+pandas
+h5py
+opencv-python
+tqdm
+Pillow
+torch
+torchvision
+efficientnet_pytorch

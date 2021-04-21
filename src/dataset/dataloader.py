@@ -73,7 +73,7 @@ class OccupancyNetDataset(Dataset):
 class OccupancyNetDatasetHDF(Dataset):
     """Occupancy Network dataset."""
 
-    def __init__(self, root_dir, transform=None, num_points=1024, default_transform=True, mode="train", balance=False):
+    def __init__(self, root_dir, transform=None, num_points=1024, default_transform=True, mode="train", balance=False, point_cloud=False):
         """
         Args:
             root_dir (string): Directory with all the images.
@@ -89,6 +89,7 @@ class OccupancyNetDatasetHDF(Dataset):
         self.files = []
         self.pos_neg_ratio = [0.1, 0.35]
         self.balance = balance
+        self.point_cloud = point_cloud
         
         # Save the files
         f = open(os.path.join(self.root_dir, "{}.lst".format(self.mode)), 'r')
@@ -112,6 +113,7 @@ class OccupancyNetDatasetHDF(Dataset):
         file_path = os.path.join(self.root_dir, req_path)
 
         # Load the h5 file
+        # print(file_path)
         hf = h5py.File(file_path, 'r')
         
         # [NOTE]: the notation [()] below is to extract the value from HDF5 file
@@ -125,6 +127,9 @@ class OccupancyNetDatasetHDF(Dataset):
             # Get the points and occupancies
             points = hf['points']['points'][()]
             occupancies = np.unpackbits(hf['points']['occupancies'][()])
+            
+            if self.point_cloud:
+                pc = hf.get('pointcloud').get('points')[()]
             
             # Sample n points from the data
             if self.balance:
@@ -153,7 +158,9 @@ class OccupancyNetDatasetHDF(Dataset):
         # Apply any transformation necessary
         if self.transform:
             final_image = self.transform(final_image)
-
+        
+        if self.point_cloud:
+            return [final_image, final_points, final_gt, pc]
         return [final_image, final_points, final_gt]
 
 

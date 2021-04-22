@@ -18,6 +18,23 @@ normals_gt = pc_data2['normals']
 occ_1 = points_data1['occupancies']
 occ_2 = points_data2['occupancies']
 
+
+empty_point_dict = {
+		    'completeness': np.sqrt(3),
+		    'accuracy': np.sqrt(3),
+		    'completeness2': 3,
+		    'accuracy2': 3,
+		    'chamfer': 6,
+		}
+
+		empty_normal_dict = {
+		    'normals completeness': -1.,
+		    'normals accuracy': -1.,
+		    'normals': -1.,
+		}
+
+
+		
 def compute_iou(occ1, occ2):
     ''' Computes the Intersection over Union (IoU) value for two sets of
     occupancy values.

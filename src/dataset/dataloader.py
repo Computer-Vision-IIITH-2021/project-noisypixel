@@ -1,6 +1,7 @@
 import os
 import glob
 import torch
+import h5py
 import cv2
 import random
 import pandas as pd
@@ -72,21 +73,25 @@ class OccupancyNetDataset(Dataset):
 class OccupancyNetDatasetHDF(Dataset):
     """Occupancy Network dataset."""
 
-    def __init__(self, root_dir, transform=None, num_points=1024, default_transform=True):
+    def __init__(self, root_dir, transform=None, num_points=1024, default_transform=True, mode="train"):
         """
         Args:
             root_dir (string): Directory with all the images.
             transform (callable, optional): Optional transform to be applied
             num_points (int): Number of points to sample in the object point cloud from the data
                 on a sample.
+            mode (str): Which data split do we want among train, test and val
         """
         self.root_dir = root_dir
         self.transform = transform
         self.num_points = num_points
+        self.mode = mode
         self.files = []
         
-        for sub in os.listdir(self.root_dir):
-            self.files.append(sub)
+        # Save the files
+        f = open(os.path.join(self.root_dir, "{}.lst".format(self.mode)), 'r')
+        self.files = f.read().split()
+        f.close()
             
         # If not transforms have been provided, apply default imagenet transform
         if transform is None and default_transform:
@@ -111,18 +116,20 @@ class OccupancyNetDatasetHDF(Dataset):
         
         # Fetch the image we need
         image = all_imgs[random_idx]
-        
-        # Get the points and occupancies
-        points = hf['points']['points'][()]
-        occupancies = np.unpackbits(hf['points']['occupancies'][()])
+        try:
+            # Get the points and occupancies
+            points = hf['points']['points'][()]
+            occupancies = np.unpackbits(hf['points']['occupancies'][()])
 
-        # Sample n points from the data
-        selected_idx = np.random.permutation(np.arange(points.shape[0]))[:self.num_points]
+            # Sample n points from the data
+            selected_idx = np.random.permutation(np.arange(points.shape[0]))[:self.num_points]
 
-        # Use only the selected indices and pack everything up in a nice dictionary
-        final_image = torch.from_numpy(image).float().transpose(1, 2).transpose(0, 1)
-        final_points = torch.from_numpy(points[selected_idx])
-        final_gt = torch.from_numpy(occupancies[selected_idx])
+            # Use only the selected indices and pack everything up in a nice dictionary
+            final_image = torch.from_numpy(image).float().transpose(1, 2).transpose(0, 1) / image.max()
+            final_points = torch.from_numpy(points[selected_idx]).float()
+            final_gt = torch.from_numpy(occupancies[selected_idx]).float()
+        except:
+            print(idx, file_path)
         
         # Close the hdf file
         hf.close()
@@ -131,7 +138,7 @@ class OccupancyNetDatasetHDF(Dataset):
         if self.transform:
             final_image = self.transform(final_image)
 
-        return final_image, final_points, final_gt
+        return [final_image, final_points, final_gt]
 
 
 if __name__ == '__main__':

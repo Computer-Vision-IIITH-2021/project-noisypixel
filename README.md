@@ -2,6 +2,13 @@
 
 __Team__: Noisy Pixels
 
+Metrics Functionality uses pykdtree library. pykdtree is a kd-tree implementation for fast nearest neighbour search in Python.The implementation is based on scipy.spatial.cKDTree and libANN by combining the best features from both and focus on implementation efficiency.
+
+Installation
+------------
+
+    $ cd <pykdtree_dir>
+    $ python setup.py install
 
 Code structure:
 ```

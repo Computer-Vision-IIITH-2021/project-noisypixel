@@ -18,6 +18,7 @@ import torch.nn.functional as F
 import pytorch_lightning as pl
 import torchmetrics
 
+<<<<<<< HEAD
 try:
     from .models import *
     from .dataset.dataloader import OccupancyNetDatasetHDF
@@ -26,6 +27,10 @@ except:
     from models import *
     from dataset.dataloader import OccupancyNetDatasetHDF
     from utils import Config
+=======
+from models import *
+from dataset.dataloader import OccupancyNetDatasetHDF
+>>>>>>> main
 
 
 class ONetLit(pl.LightningModule):

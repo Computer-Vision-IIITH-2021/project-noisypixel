@@ -43,8 +43,91 @@ In the above structure, the source code for the whole implementation can be foun
 
 Metrics Functionality uses pykdtree library. pykdtree is a kd-tree implementation for fast nearest neighbour search in Python.The implementation is based on scipy.spatial.cKDTree and libANN by combining the best features from both and focus on implementation efficiency.
 
-Installation
-------------
 
-    $ cd <pykdtree_dir>
-    $ python setup.py install
+Dataset
+---
+
+Download the dataset for shapenet from: [here](https://s3.eu-central-1.amazonaws.com/avg-projects/occupancy_networks/data/dataset_small_v1.1.zip)
+
+Then to process the dataset, use the script as: `python3 src/dataset/data_process.py --dataroot <unzipped dataset path> --output <your data output path>`
+
+This script will process the dataset and prepare it in the form of HDF5 files for each object separately. This will also apply the point encoding on the dataset.
+
+Setup
+---
+
+To setup the required libraries for mesh processing, run the following command:
+```
+python3 setup.py build_ext --inplace
+```
+
+The following also need to be installed to run the code properly:
+```
+pip3 install --user pytorch-lightning efficientnet-pytorch pykdtree
+```
+
+Training
+---
+
+To train the model, use the following command:
+```
+$ python3 src/train.py --help
+usage: train.py [-h] [--cdim CDIM] [--hdim HDIM] [--pdim PDIM] [--data_root DATA_ROOT] [--batch_size BATCH_SIZE] [--output_path OUTPUT_PATH] [--exp_name EXP_NAME] [--encoder ENCODER] [--decoder DECODER]
+
+Argument parser for training the model
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --cdim CDIM           feature dimension
+  --hdim HDIM           hidden size for decoder
+  --pdim PDIM           points input size for decoder
+  --data_root DATA_ROOT
+                        location of the parsed and processed dataset
+  --batch_size BATCH_SIZE
+                        Training batch size
+  --output_path OUTPUT_PATH
+                        Model saving and checkpoint paths
+  --exp_name EXP_NAME   Name of the experiment. Artifacts will be created with this name
+  --encoder ENCODER     Name of the Encoder architecture to use
+  --decoder DECODER     Name of the decoder architecture to use
+```
+
+Fill the values accordingly for the configuration and the model shall start training. We can also make use of mixed precision training via pytorch lightning. To do this, edit the `src/trainer.py` script.
+
+To view the training progress, run tensorboard in your experiment directory `tensorboard --logdir=<experiment directory>`
+
+
+Evaluation
+----
+To run evaluation on the test set (selective objects: roughly 500 for now. Change it in the script for more), use the following script:
+
+```
+$ python3 run_evals.py --help
+usage: run_evals.py [-h] [--cdim CDIM] [--hdim HDIM] [--pdim PDIM] [--data_root DATA_ROOT] [--batch_size BATCH_SIZE] [--output_path OUTPUT_PATH] [--exp_name EXP_NAME] [--encoder ENCODER] [--decoder DECODER]
+                    [--checkpoint CHECKPOINT]
+
+Argument parser for training the model
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --cdim CDIM           feature dimension
+  --hdim HDIM           hidden size for decoder
+  --pdim PDIM           points input size for decoder
+  --data_root DATA_ROOT
+                        location of the parsed and processed dataset
+  --batch_size BATCH_SIZE
+                        Training batch size
+  --output_path OUTPUT_PATH
+                        Model saving and checkpoint paths
+  --exp_name EXP_NAME   Name of the experiment. Artifacts will be created with this name
+  --encoder ENCODER     Name of the Encoder architecture to use
+  --decoder DECODER     Name of the decoder architecture to use
+  --checkpoint CHECKPOINT
+                        Checkpoint Path
+```
+
+
+Visualization
+---
+
+To generate 3D models and meshes, use `jupyter` notebook or lab environment, and run `check_model.ipynb`. Keep the config flags same as evaluation and tweak the save path to see results.

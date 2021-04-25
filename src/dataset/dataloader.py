@@ -130,6 +130,7 @@ class OccupancyNetDatasetHDF(Dataset):
             
             if self.point_cloud:
                 pc = hf.get('pointcloud').get('points')[()]
+                normal = hf.get('pointcloud').get('normals')[()]
             
             # Sample n points from the data
             if self.balance:
@@ -160,7 +161,7 @@ class OccupancyNetDatasetHDF(Dataset):
             final_image = self.transform(final_image)
         
         if self.point_cloud:
-            return [final_image, final_points, final_gt, pc]
+            return [final_image, final_points, final_gt, pc, normal]
         return [final_image, final_points, final_gt]
 
 
